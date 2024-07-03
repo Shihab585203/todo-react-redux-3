@@ -1,35 +1,89 @@
-import { removeTodo, sortTodos, toggleComplete } from "../../redux/features/todoSlice";
+import { useUpdateTodoMutation } from "../../redux/api/api";
+import {
+  removeTodo,
+  sortTodos,
+  toggleComplete,
+} from "../../redux/features/todoSlice";
 import { useAppDispatch } from "../../redux/hook";
 import { Button } from "../ui/button";
 
 type TTodoCardProps = {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   isCompleted?: boolean;
+  priority: string;
 };
 
-const TodoCard = ({ title, description, id, isCompleted }: TTodoCardProps) => {
-  const dispatch = useAppDispatch();
+const TodoCard = ({
+  _id,
+  title,
+  description,
+  isCompleted,
+  priority,
+}: TTodoCardProps) => {
+  //local State
+  // const dispatch = useAppDispatch();
+
+  const [updateTodo, { isSuccess }] = useUpdateTodoMutation();
 
   const toggleState = () => {
-    dispatch(toggleComplete(id));
-    dispatch(sortTodos());
+    const todoData = {
+      _id,
+      title,
+      description,
+      priority,
+      isCompleted: !isCompleted,
+    };
+
+    const options = {
+      id: _id,
+      data: {
+        _id,
+        title,
+        description,
+        priority,
+        isCompleted: !isCompleted,
+      },
+    };
+
+    console.log(todoData);
+    updateTodo(options);
+    //local state
+    //   dispatch(toggleComplete(id));
+    //   dispatch(sortTodos());
+    //serverState
   };
 
   return (
     <div>
       <div className="bg-white flex justify-between items-center rounded-xl p-3 border">
-        <input onClick={toggleState} type="checkbox" name="" id="" />
-        <p className="font-semibold">{title}</p>
-        <div className="font-semibold">
+        <input
+          className="mr-5"
+          onClick={toggleState}
+          type="checkbox"
+          defaultChecked={isCompleted}
+        />
+        <p className="flex-1 font-semibold">{title}</p>
+        <div className="flex flex-1  items-center gap-2">
+          <div
+            className={`
+            size-3 rounded-full
+            ${priority === "low" ? "bg-red-500" : null}
+            ${priority === "medium" ? "bg-yellow-500" : null}
+            ${priority === "high" ? "bg-green-500" : null}
+            `}
+          ></div>
+          <p className="flex-1 font-semibold">{priority}</p>
+        </div>
+        <div className="flex-1 font-semibold">
           {isCompleted ? (
             <p className="text-green-500">Done</p>
           ) : (
             <p className="text-red-500">Pending</p>
           )}
         </div>
-        <p>{description}</p>
+        <p className="flex-1">{description}</p>
         <div className="space-x-5">
           <Button
             onClick={() => dispatch(removeTodo(id))}

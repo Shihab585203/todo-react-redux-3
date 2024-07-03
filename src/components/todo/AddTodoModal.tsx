@@ -1,5 +1,6 @@
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -11,26 +12,52 @@ import { Button } from "../ui/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
 import { FormEvent, useState } from "react";
-import { useAppDispatch } from "../../redux/hook";
-import { addTodo } from "../../redux/features/todoSlice";
+// import { useAppDispatch } from "../../redux/hook";
+import { useAddTodoMutation } from "../../redux/api/api";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const AddTodoModal = () => {
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
-  const dispatch = useAppDispatch();
+  const [priority, setPriority] = useState("");
+
+
+
+  // For LocalState Management
+  // const dispatch = useAppDispatch();
+
+  //For server
+  const [addTodo, { data, isLoading, isError, isSuccess }] =
+    useAddTodoMutation(undefined);
+
+
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
-    const randomString = Math.random().toString(36).substring(2, 9);
+    // const randomString = Math.random().toString(36).substring(2, 9);
 
     const taskDetails = {
-      id: randomString,
+      // id: randomString,
       title: task,
-      description: description,
+      description,
+      isCompleted: false,
+      priority,
     };
 
-    dispatch(addTodo(taskDetails));
+    //For Local State management
+    // dispatch(addTodo(taskDetails));
+
+    //For Server State management
+    addTodo(taskDetails);
 
     const form = event.target as HTMLFormElement;
     form.reset();
@@ -69,10 +96,30 @@ const AddTodoModal = () => {
                 className="col-span-3"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Priority</Label>
+              <Select onValueChange={(value) => setPriority(value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Priority</SelectLabel>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <DialogFooter>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
+          <div className="flex justify-end">
+            <DialogClose>
+              <Button className="" type="submit">
+                Save changes
+              </Button>
+            </DialogClose>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
